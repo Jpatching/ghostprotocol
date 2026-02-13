@@ -4,7 +4,7 @@
 
 Built for the [Colosseum Agent Hackathon](https://colosseum.com/agent-hackathon) | February 2026
 
-![Dashboard](screenshots/01-dashboard.png)
+![Demo](screenshots/demo.gif)
 
 ---
 

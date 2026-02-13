@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import SolanaWallet from "./SolanaWallet";
 import CancelModal from "./CancelModal";
+import ScanOverlay from "./ScanOverlay";
 
 interface Subscription {
   id: number;
@@ -26,6 +27,8 @@ export default function Dashboard() {
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
   const [savings, setSavings] = useState<SavingsSummary | null>(null);
   const [cancelTarget, setCancelTarget] = useState<Subscription | null>(null);
+  const [scanning, setScanning] = useState(false);
+  const [hasScanned, setHasScanned] = useState(false);
 
   const loadData = useCallback(() => {
     invoke<string>("get_db_status")
@@ -33,7 +36,10 @@ export default function Dashboard() {
       .catch(() => setDbStatus("Error"));
 
     invoke<Subscription[]>("get_subscriptions")
-      .then(setSubscriptions)
+      .then((subs) => {
+        setSubscriptions(subs);
+        if (subs.length > 0) setHasScanned(true);
+      })
       .catch(console.error);
 
     invoke<string>("get_savings_summary")
@@ -77,7 +83,24 @@ export default function Dashboard() {
             </span>
           </div>
         )}
+        <button
+          onClick={() => setScanning(true)}
+          className="ml-auto bg-ghost-accent text-white px-4 py-2 rounded-lg text-sm hover:bg-ghost-accent/80 transition flex items-center gap-2"
+        >
+          <span>Scan Transactions</span>
+        </button>
       </div>
+
+      {/* Scan Overlay */}
+      {scanning && (
+        <ScanOverlay
+          onComplete={() => {
+            setHasScanned(true);
+            loadData();
+          }}
+          onClose={() => setScanning(false)}
+        />
+      )}
 
       {/* Active Subscriptions */}
       <div className="bg-ghost-card border border-ghost-border rounded-xl p-6">
@@ -86,16 +109,33 @@ export default function Dashboard() {
             Active Subscriptions ({activeSubs.length})
           </h2>
           <span className="text-xs text-ghost-muted">
-            Detected from bank transactions
+            {hasScanned ? "Detected from bank transactions" : "Run a scan to detect subscriptions"}
           </span>
         </div>
 
         {activeSubs.length === 0 ? (
           <div className="text-center py-8">
-            <div className="text-3xl mb-3">🎉</div>
-            <p className="text-ghost-green text-sm font-medium">
-              All subscriptions cancelled!
-            </p>
+            {hasScanned ? (
+              <>
+                <div className="text-3xl mb-3">🎉</div>
+                <p className="text-ghost-green text-sm font-medium">
+                  All subscriptions cancelled!
+                </p>
+              </>
+            ) : (
+              <>
+                <div className="text-3xl mb-3">👻</div>
+                <p className="text-ghost-muted text-sm">
+                  No subscriptions detected yet.
+                </p>
+                <button
+                  onClick={() => setScanning(true)}
+                  className="mt-3 bg-ghost-accent text-white px-6 py-2 rounded-lg text-sm hover:bg-ghost-accent/80 transition"
+                >
+                  Scan Transactions
+                </button>
+              </>
+            )}
           </div>
         ) : (
           <div className="space-y-2">

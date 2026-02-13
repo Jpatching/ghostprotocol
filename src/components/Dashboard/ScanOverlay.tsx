@@ -20,6 +20,13 @@ export default function ScanOverlay({ onComplete, onClose }: ScanOverlayProps) {
   const [currentStep, setCurrentStep] = useState(0);
   const [done, setDone] = useState(false);
   const [result, setResult] = useState<{ subscriptions_found: number; total_monthly: number; total_annual: number } | null>(null);
+  const [elapsed, setElapsed] = useState(0);
+
+  useEffect(() => {
+    if (done) return;
+    const timer = setInterval(() => setElapsed((e) => e + 1), 1000);
+    return () => clearInterval(timer);
+  }, [done]);
 
   useEffect(() => {
     if (currentStep < SCAN_STEPS.length) {
@@ -54,7 +61,7 @@ export default function ScanOverlay({ onComplete, onClose }: ScanOverlayProps) {
               </div>
               <div>
                 <h3 className="text-white font-semibold">Scanning Transactions</h3>
-                <p className="text-ghost-muted text-xs">AI agent analyzing your data</p>
+                <p className="text-ghost-muted text-xs">AI agent analyzing your data · {elapsed}s elapsed</p>
               </div>
             </div>
 
@@ -98,23 +105,26 @@ export default function ScanOverlay({ onComplete, onClose }: ScanOverlayProps) {
             </div>
 
             <div className="grid grid-cols-3 gap-3 mb-6">
-              <div className="bg-ghost-darker rounded-xl p-3 text-center">
+              <div className="bg-ghost-darker rounded-xl p-3 text-center border border-ghost-border">
                 <p className="text-2xl font-bold text-white">{result?.subscriptions_found}</p>
-                <p className="text-ghost-muted text-xs">Found</p>
+                <p className="text-ghost-muted text-xs">Detected</p>
               </div>
-              <div className="bg-ghost-darker rounded-xl p-3 text-center">
+              <div className="bg-ghost-red/10 rounded-xl p-3 text-center border border-ghost-red/20">
                 <p className="text-2xl font-bold text-ghost-red">
                   ${result?.total_monthly.toFixed(0)}
                 </p>
-                <p className="text-ghost-muted text-xs">Monthly</p>
+                <p className="text-ghost-muted text-xs">/month</p>
               </div>
-              <div className="bg-ghost-darker rounded-xl p-3 text-center">
+              <div className="bg-ghost-red/10 rounded-xl p-3 text-center border border-ghost-red/20">
                 <p className="text-2xl font-bold text-ghost-red">
                   ${result?.total_annual.toFixed(0)}
                 </p>
-                <p className="text-ghost-muted text-xs">Annual</p>
+                <p className="text-ghost-muted text-xs">/year</p>
               </div>
             </div>
+            <p className="text-ghost-muted text-xs text-center mb-4">
+              Scanned in {elapsed}s
+            </p>
 
             <button
               onClick={() => {

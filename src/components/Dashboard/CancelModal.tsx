@@ -42,6 +42,7 @@ export default function CancelModal({
   const [cancelResult, setCancelResult] = useState<CancelResult | null>(null);
   const [txSignature, setTxSignature] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [signingPhase, setSigningPhase] = useState(0);
 
   // Generate cancellation email on mount
   useEffect(() => {
@@ -58,6 +59,7 @@ export default function CancelModal({
 
   const signAndConfirm = async () => {
     setStep("signing");
+    setSigningPhase(0);
     try {
       // Get keypair from localStorage
       const stored = localStorage.getItem("ghost_wallet_secret");
@@ -70,6 +72,7 @@ export default function CancelModal({
       const connection = new Connection(DEVNET_URL, "confirmed");
 
       // Check balance
+      setSigningPhase(1);
       const balance = await connection.getBalance(keypair.publicKey);
       if (balance < 0.001 * LAMPORTS_PER_SOL) {
         throw new Error(
@@ -104,11 +107,13 @@ export default function CancelModal({
       transaction.feePayer = keypair.publicKey;
       const { blockhash } = await connection.getLatestBlockhash();
       transaction.recentBlockhash = blockhash;
+      setSigningPhase(2);
       transaction.sign(keypair);
 
       const sig = await connection.sendRawTransaction(
         transaction.serialize()
       );
+      setSigningPhase(3);
       await connection.confirmTransaction(sig, "confirmed");
 
       setTxSignature(sig);
@@ -206,45 +211,81 @@ export default function CancelModal({
           )}
 
           {step === "signing" && (
-            <div className="text-center py-8">
-              <div className="text-3xl mb-3 animate-spin">⛓️</div>
-              <p className="text-ghost-text">
-                Signing transaction on Solana Devnet...
-              </p>
-              <p className="text-ghost-muted text-xs mt-2">
-                Creating on-chain proof of cancellation
-              </p>
+            <div className="py-6 space-y-4">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="h-10 w-10 rounded-xl bg-ghost-accent/20 flex items-center justify-center">
+                  <div className="h-5 w-5 border-2 border-ghost-accent border-t-transparent rounded-full animate-spin" />
+                </div>
+                <div>
+                  <p className="text-white font-medium">Signing on Solana</p>
+                  <p className="text-ghost-muted text-xs">Creating on-chain proof of cancellation</p>
+                </div>
+              </div>
+              <div className="space-y-2">
+                {[
+                  "Loading wallet keypair",
+                  "Checking SOL balance",
+                  "Signing transaction",
+                  "Confirming on-chain",
+                ].map((label, i) => (
+                  <div
+                    key={i}
+                    className={`flex items-center gap-2 text-sm transition-all duration-300 ${
+                      i < signingPhase
+                        ? "text-ghost-green"
+                        : i === signingPhase
+                          ? "text-white"
+                          : "text-ghost-muted/40"
+                    }`}
+                  >
+                    <span className="w-4 text-center">
+                      {i < signingPhase ? "✓" : i === signingPhase ? "▸" : "○"}
+                    </span>
+                    <span>{label}</span>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
 
           {step === "done" && (
-            <div className="text-center py-8 space-y-4">
+            <div className="text-center py-6 space-y-4">
               <div className="text-4xl mb-2">✅</div>
               <p className="text-white font-medium text-lg">
                 {subscription.name} Cancelled!
               </p>
-              <p className="text-ghost-green text-sm">
-                Saving ${subscription.amount.toFixed(2)}/month ($
-                {(subscription.amount * 12).toFixed(2)}/year)
-              </p>
+              <div className="bg-ghost-green/10 border border-ghost-green/30 rounded-lg px-4 py-3">
+                <p className="text-ghost-green font-medium">
+                  Saving ${subscription.amount.toFixed(2)}/month
+                </p>
+                <p className="text-ghost-green/70 text-sm">
+                  ${(subscription.amount * 12).toFixed(2)} saved per year
+                </p>
+              </div>
               {txSignature && (
-                <div className="bg-ghost-darker rounded-lg p-4 text-left">
-                  <p className="text-xs text-ghost-muted mb-1">
-                    Solana Transaction (Devnet)
-                  </p>
+                <div className="bg-ghost-darker rounded-lg p-4 text-left space-y-2">
+                  <div className="flex items-center gap-2">
+                    <span className="inline-block h-2 w-2 rounded-full bg-ghost-accent animate-pulse" />
+                    <p className="text-xs text-ghost-accent-light font-medium">
+                      On-Chain Proof Recorded
+                    </p>
+                  </div>
                   <a
                     href={`https://explorer.solana.com/tx/${txSignature}?cluster=devnet`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-xs text-ghost-accent-light hover:underline font-mono break-all"
+                    className="text-xs text-ghost-muted hover:text-ghost-accent-light transition font-mono break-all block"
                   >
                     {txSignature}
                   </a>
+                  <p className="text-xs text-ghost-muted">
+                    View on Solana Explorer →
+                  </p>
                 </div>
               )}
               <button
                 onClick={onClose}
-                className="bg-ghost-accent text-white px-6 py-2 rounded-lg hover:bg-ghost-accent/80 transition"
+                className="w-full bg-ghost-accent text-white px-6 py-3 rounded-lg hover:bg-ghost-accent/80 transition font-medium"
               >
                 Done
               </button>

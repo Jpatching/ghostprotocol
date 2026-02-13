@@ -142,7 +142,7 @@ export default function Dashboard() {
             {activeSubs.map((sub) => (
               <div
                 key={sub.id}
-                className="flex items-center justify-between bg-ghost-darker rounded-lg px-4 py-3"
+                className="flex items-center justify-between bg-ghost-darker rounded-lg px-4 py-3 hover:bg-ghost-darker/80 hover:border-ghost-accent/20 border border-transparent transition-all duration-200 group"
               >
                 <div>
                   <p className="text-white text-sm font-medium">{sub.name}</p>
@@ -157,7 +157,7 @@ export default function Dashboard() {
                   </div>
                   <button
                     onClick={() => setCancelTarget(sub)}
-                    className="text-xs bg-ghost-red/20 text-ghost-red px-3 py-1.5 rounded-lg hover:bg-ghost-red/30 transition"
+                    className="text-xs bg-ghost-red/20 text-ghost-red px-3 py-1.5 rounded-lg hover:bg-ghost-red/30 transition opacity-70 group-hover:opacity-100"
                   >
                     Cancel
                   </button>
@@ -193,15 +193,20 @@ export default function Dashboard() {
                     </p>
                     <p className="text-ghost-muted text-xs">saved</p>
                   </div>
-                  {sub.cancel_tx && (
+                  {sub.cancel_tx ? (
                     <a
                       href={`https://explorer.solana.com/tx/${sub.cancel_tx}?cluster=devnet`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-xs text-ghost-accent-light hover:underline"
+                      className="text-xs bg-ghost-accent/15 text-ghost-accent-light px-2 py-1 rounded-md hover:bg-ghost-accent/25 transition flex items-center gap-1"
                     >
+                      <span className="inline-block h-1.5 w-1.5 rounded-full bg-ghost-accent" />
                       On-chain proof
                     </a>
+                  ) : (
+                    <span className="text-xs text-ghost-muted px-2 py-1">
+                      No proof
+                    </span>
                   )}
                 </div>
               </div>

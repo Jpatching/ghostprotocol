@@ -23,6 +23,7 @@ export default function SolanaWallet() {
   });
   const [keypair, setKeypair] = useState<Keypair | null>(null);
   const [airdropping, setAirdropping] = useState(false);
+  const [airdropMsg, setAirdropMsg] = useState<{ type: "success" | "error"; text: string } | null>(null);
   const [connection] = useState(() => new Connection(DEVNET_URL, "confirmed"));
 
   const connectWallet = useCallback(async () => {
@@ -61,6 +62,7 @@ export default function SolanaWallet() {
   const requestAirdrop = async () => {
     if (!keypair) return;
     setAirdropping(true);
+    setAirdropMsg(null);
     try {
       const sig = await connection.requestAirdrop(
         keypair.publicKey,
@@ -72,10 +74,13 @@ export default function SolanaWallet() {
         ...w,
         balance: balance / LAMPORTS_PER_SOL,
       }));
+      setAirdropMsg({ type: "success", text: "1 SOL airdropped successfully!" });
     } catch (err) {
-      console.error("Airdrop failed:", err);
+      const msg = err instanceof Error ? err.message : "Airdrop failed";
+      setAirdropMsg({ type: "error", text: msg.includes("rate") ? "Rate limited — try again in a minute" : msg });
     } finally {
       setAirdropping(false);
+      setTimeout(() => setAirdropMsg(null), 5000);
     }
   };
 
@@ -162,6 +167,12 @@ export default function SolanaWallet() {
               {airdropping ? "Requesting..." : "Request 1 SOL Airdrop"}
             </button>
           </div>
+
+          {airdropMsg && (
+            <p className={`text-xs ${airdropMsg.type === "success" ? "text-ghost-green" : "text-ghost-red"}`}>
+              {airdropMsg.text}
+            </p>
+          )}
 
           {/* Token Info */}
           <div className="bg-ghost-darker rounded-lg px-4 py-3">

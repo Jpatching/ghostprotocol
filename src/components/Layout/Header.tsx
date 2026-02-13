@@ -14,9 +14,14 @@ export default function Header() {
   const [stats, setStats] = useState<Stats | null>(null);
 
   useEffect(() => {
-    invoke<string>("get_stats")
-      .then((json) => setStats(JSON.parse(json)))
-      .catch(console.error);
+    const fetchStats = () =>
+      invoke<string>("get_stats")
+        .then((json) => setStats(JSON.parse(json)))
+        .catch(console.error);
+
+    fetchStats();
+    const interval = setInterval(fetchStats, 5000);
+    return () => clearInterval(interval);
   }, []);
 
   return (

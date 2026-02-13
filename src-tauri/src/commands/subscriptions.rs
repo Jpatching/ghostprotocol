@@ -82,7 +82,7 @@ pub fn cancel_subscription(db: State<'_, Database>, id: i64) -> Result<CancelRes
     }
 
     // Generate cancellation email
-    let email_subject = format!("Cancellation Request - {} Subscription", sub.name);
+    let email_subject = format!("Cancellation Request: {}", sub.name);
     let email_body = format!(
         "Dear {} Customer Support,\n\n\
          I am writing to request the immediate cancellation of my {} subscription \

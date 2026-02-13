@@ -88,6 +88,14 @@ pub fn get_activity_log(db: State<'_, Database>) -> Result<Vec<ActivityEntry>, S
             )
             .map_err(|e| e.to_string())?;
 
+        let scan_ts: String = conn
+            .query_row(
+                "SELECT datetime('now')",
+                [],
+                |row| row.get(0),
+            )
+            .unwrap_or_else(|_| "Unknown".to_string());
+
         activities.push(ActivityEntry {
             id: id_counter,
             action: "scan_complete".to_string(),
@@ -95,7 +103,7 @@ pub fn get_activity_log(db: State<'_, Database>) -> Result<Vec<ActivityEntry>, S
                 "Detected {} subscriptions totaling ${:.2}/month",
                 sub_count, total
             ),
-            timestamp: "On first launch".to_string(),
+            timestamp: scan_ts,
         });
         id_counter += 1;
     }

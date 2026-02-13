@@ -37,16 +37,29 @@ pub fn seed_demo_data(conn: &Connection) -> Result<(), rusqlite::Error> {
         conn.query_row("SELECT COUNT(*) FROM subscriptions", [], |row| row.get(0))?;
 
     if count == 0 {
+        // Insert all candidates into a temp table, then pick 6-8 randomly
         conn.execute_batch(
             "
-            INSERT INTO subscriptions (name, amount, frequency, merchant, status) VALUES
-                ('Netflix Premium', 22.99, 'monthly', 'Netflix Inc.', 'active'),
-                ('Spotify Family', 16.99, 'monthly', 'Spotify AB', 'active'),
-                ('Adobe Creative Cloud', 54.99, 'monthly', 'Adobe Systems', 'active'),
-                ('ChatGPT Plus', 20.00, 'monthly', 'OpenAI', 'active'),
-                ('Gym Membership', 49.99, 'monthly', 'Planet Fitness', 'active'),
-                ('iCloud+ 200GB', 2.99, 'monthly', 'Apple Inc.', 'active'),
-                ('YouTube Premium', 13.99, 'monthly', 'Google LLC', 'active');
+            CREATE TEMP TABLE seed_pool (name TEXT, amount REAL, frequency TEXT, merchant TEXT);
+            INSERT INTO seed_pool VALUES
+                ('Netflix Premium', 22.99, 'monthly', 'Netflix Inc.'),
+                ('Spotify Family', 16.99, 'monthly', 'Spotify AB'),
+                ('Adobe Creative Cloud', 54.99, 'monthly', 'Adobe Systems'),
+                ('ChatGPT Plus', 20.00, 'monthly', 'OpenAI'),
+                ('Gym Membership', 49.99, 'monthly', 'Planet Fitness'),
+                ('iCloud+ 200GB', 2.99, 'monthly', 'Apple Inc.'),
+                ('YouTube Premium', 13.99, 'monthly', 'Google LLC'),
+                ('AWS Developer Tools', 29.00, 'monthly', 'Amazon Web Services'),
+                ('Notion Plus', 10.00, 'monthly', 'Notion Labs'),
+                ('Slack Pro', 8.75, 'monthly', 'Salesforce'),
+                ('Hulu (No Ads)', 17.99, 'monthly', 'Hulu LLC'),
+                ('NYT Digital', 4.25, 'monthly', 'The New York Times');
+
+            INSERT INTO subscriptions (name, amount, frequency, merchant, status)
+                SELECT name, amount, frequency, merchant, 'active'
+                FROM seed_pool ORDER BY RANDOM() LIMIT (ABS(RANDOM()) % 3 + 6);
+
+            DROP TABLE seed_pool;
             ",
         )?;
     }

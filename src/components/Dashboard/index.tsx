@@ -87,7 +87,7 @@ export default function Dashboard() {
           onClick={() => setScanning(true)}
           className="ml-auto bg-ghost-accent text-white px-4 py-2 rounded-lg text-sm hover:bg-ghost-accent/80 transition flex items-center gap-2"
         >
-          <span>Scan Transactions</span>
+          <span>{hasScanned ? "Re-scan Transactions" : "Scan Transactions"}</span>
         </button>
       </div>
 
@@ -206,6 +206,52 @@ export default function Dashboard() {
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+      )}
+
+      {/* Spending Insights */}
+      {subscriptions.length > 0 && savings && (
+        <div className="bg-ghost-card border border-ghost-border rounded-xl p-6">
+          <h2 className="text-lg font-semibold text-white mb-4">
+            Spending Insights
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="bg-ghost-darker rounded-lg px-4 py-3">
+              <p className="text-xs text-ghost-muted mb-1">Monthly Spend</p>
+              <p className="text-xl text-white font-mono">
+                ${savings.monthly_active.toFixed(2)}
+              </p>
+              <p className="text-xs text-ghost-muted mt-1">
+                ${(savings.monthly_active * 12).toFixed(0)}/yr projected
+              </p>
+            </div>
+            <div className="bg-ghost-darker rounded-lg px-4 py-3">
+              <p className="text-xs text-ghost-muted mb-1">Most Expensive</p>
+              <p className="text-xl text-white font-mono">
+                {activeSubs.length > 0
+                  ? `$${Math.max(...activeSubs.map((s) => s.amount)).toFixed(2)}`
+                  : "$0"}
+              </p>
+              <p className="text-xs text-ghost-muted mt-1">
+                {activeSubs.length > 0
+                  ? activeSubs.reduce((a, b) => (a.amount > b.amount ? a : b)).name
+                  : "—"}
+              </p>
+            </div>
+            <div className="bg-ghost-darker rounded-lg px-4 py-3">
+              <p className="text-xs text-ghost-muted mb-1">vs. US Average</p>
+              <p className="text-xl text-white font-mono">
+                {savings.monthly_active > 91
+                  ? `+${((savings.monthly_active / 91 - 1) * 100).toFixed(0)}%`
+                  : savings.monthly_active > 0
+                    ? `${((1 - savings.monthly_active / 91) * 100).toFixed(0)}% less`
+                    : "—"}
+              </p>
+              <p className="text-xs text-ghost-muted mt-1">
+                Avg US household: $91/mo
+              </p>
+            </div>
           </div>
         </div>
       )}

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import {
   Connection,
@@ -44,7 +44,7 @@ export default function CancelModal({
   const [error, setError] = useState<string | null>(null);
 
   // Generate cancellation email on mount
-  useState(() => {
+  useEffect(() => {
     invoke<CancelResult>("cancel_subscription", { id: subscription.id })
       .then((result) => {
         setCancelResult(result);
@@ -54,7 +54,7 @@ export default function CancelModal({
         setError(String(err));
         setStep("error");
       });
-  });
+  }, [subscription.id]);
 
   const signAndConfirm = async () => {
     setStep("signing");

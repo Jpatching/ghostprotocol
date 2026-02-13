@@ -4,6 +4,8 @@
 
 Built for the [Colosseum Agent Hackathon](https://colosseum.com/agent-hackathon) | February 2026
 
+![Dashboard](screenshots/01-dashboard.png)
+
 ---
 
 ## The Problem
@@ -28,6 +30,18 @@ Ghost Protocol is a **desktop application** that runs entirely on your machine. 
 4. **Sign** — Mint an on-chain memo transaction on Solana as immutable proof of cancellation
 5. **Save** — Real-time savings tracker shows monthly and annual impact
 6. **Track** — Full activity log records every agent action
+
+---
+
+## Screenshots
+
+| Dashboard | Cancel Flow | Insights & Wallet |
+|-----------|------------|-------------------|
+| ![Dashboard](screenshots/01-dashboard.png) | ![Cancel](screenshots/05-cancel-modal.png) | ![Insights](screenshots/02-insights-wallet.png) |
+
+| Activity Log | Settings |
+|-------------|----------|
+| ![Activity](screenshots/03-activity.png) | ![Settings](screenshots/04-settings.png) |
 
 ---
 

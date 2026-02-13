@@ -43,13 +43,21 @@ export default function SolanaWallet() {
       }
       setKeypair(kp);
 
-      const balance = await connection.getBalance(kp.publicKey);
+      // Show wallet as connected immediately, fetch balance in background
       setWallet({
         publicKey: kp.publicKey.toBase58(),
-        balance: balance / LAMPORTS_PER_SOL,
+        balance: null,
         status: "connected",
         error: null,
       });
+
+      try {
+        const balance = await connection.getBalance(kp.publicKey);
+        setWallet((w) => ({ ...w, balance: balance / LAMPORTS_PER_SOL }));
+      } catch {
+        // Balance fetch failed but wallet is still usable
+        setWallet((w) => ({ ...w, balance: 0 }));
+      }
     } catch (err) {
       setWallet((w) => ({
         ...w,

@@ -8,20 +8,13 @@ pub struct Subscription {
     pub frequency: String,
     pub merchant: String,
     pub status: String,
+    pub cancelled_at: Option<String>,
+    pub cancel_tx: Option<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct Task {
+pub struct CancelResult {
     pub id: i64,
-    pub task_type: String,
-    pub status: String,
-    pub input_data: Option<String>,
-    pub output_data: Option<String>,
-}
-
-#[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct ApiKey {
-    pub service: String,
-    pub encrypted_key: String,
-    pub created_at: String,
+    pub email_subject: String,
+    pub email_body: String,
 }

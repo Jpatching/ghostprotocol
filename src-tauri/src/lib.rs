@@ -17,12 +17,21 @@ pub fn run() {
             let database =
                 Database::new(&app_data_dir).expect("failed to initialize database");
 
+            // Seed demo data on first run
+            {
+                let conn = database.conn.lock().unwrap();
+                db::schema::seed_demo_data(&conn).expect("failed to seed demo data");
+            }
+
             app.manage(database);
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
             commands::subscriptions::get_subscriptions,
             commands::subscriptions::get_db_status,
+            commands::subscriptions::cancel_subscription,
+            commands::subscriptions::confirm_cancellation,
+            commands::subscriptions::get_savings_summary,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

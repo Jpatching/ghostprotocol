@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
+import SolanaWallet from "./SolanaWallet";
 
 interface Subscription {
   id: number;
@@ -85,21 +86,8 @@ export default function Dashboard() {
         )}
       </div>
 
-      {/* Solana Integration Preview */}
-      <div className="bg-ghost-card border border-ghost-border rounded-xl p-6">
-        <h2 className="text-lg font-semibold text-white mb-4">
-          Solana Integration
-        </h2>
-        <div className="text-center py-8">
-          <div className="text-3xl mb-3">⛓️</div>
-          <p className="text-ghost-muted text-sm">
-            Receipt NFTs and $GHOST token rewards coming soon.
-          </p>
-          <p className="text-ghost-muted text-xs mt-1">
-            Powered by Solana for on-chain proof of savings.
-          </p>
-        </div>
-      </div>
+      {/* Solana Wallet */}
+      <SolanaWallet />
     </div>
   );
 }
